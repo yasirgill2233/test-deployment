@@ -1,7 +1,7 @@
 console.log("hello world")
 
 function myFunction(){
-    console.log("My Function is called, updated again")
+    console.log("My Function is called, updated again and again")
 }
 
 myFunction()
