@@ -90,7 +90,6 @@ jobs:
             mkdir -p /home/ubuntu/test-deployments/ucollyx-test-app
             cd /home/ubuntu/test-deployments/ucollyx-test-app
             echo "Deploying fresh artifacts..."
-
       # 🟢 NOTIFY UCOLLYX ON SUCCESS
       - name: Broadcast Success to UCollyx Ecosystem
         if: success()
@@ -101,7 +100,6 @@ jobs:
           STATUS="Success" # Matches backend ENUM capitalization
           LOG_SUMMARY="HTML layout deployed cleanly on AWS EC2 environment."
           LOG_OUTPUT="GitHub Actions Workflow: Success\nBranch: main\nCommit: ${{ github.sha }}\nRunner ID: ${{ github.run_id }}"
-
           curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
             -H "Content-Type: application/json" \
             -d "{
@@ -112,7 +110,6 @@ jobs:
               \"log_summary\": \"$LOG_SUMMARY\",
               \"log_output\": \"$LOG_OUTPUT\"
             }"
-
       # 🔴 NOTIFY UCOLLYX ON FAILURE
       - name: Broadcast Failure to UCollyx Ecosystem
         if: failure()
@@ -123,7 +120,6 @@ jobs:
           STATUS="Failed" # Matches backend ENUM capitalization
           LOG_SUMMARY="Pipeline compilation or synchronization crashed."
           LOG_OUTPUT="GitHub Actions Workflow: Failed\nBranch: main\nCheck logs for runner execution failure details."
-
           curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
             -H "Content-Type: application/json" \
             -d "{
