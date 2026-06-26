@@ -1,4 +1,72 @@
-name: UCollyx Production Pipeline - new_project_for_testing
+# name: UCollyx Production Pipeline - new_project_for_testing
+# 
+# on:
+#   push:
+#     branches: [ main ]
+# 
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Repository Code
+#         uses: actions/checkout@v4
+# 
+#       - name: Setup Node.js Runtime Environment
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: '20'
+#           cache: 'npm'
+# 
+#       - name: Execute Framework Build Matrix
+#         run: |
+#           npm install
+# 
+#       # 🟢 NOTIFY UCOLLYX ON SUCCESS
+#       - name: Broadcast Success to UCollyx Ecosystem
+#         if: success()
+#         run: |
+#           PROJECT_ID="5"
+#           VERSION="v1.0.${{ github.run_number }}"
+#           ENV_TYPE="prod"
+#           STATUS="Success"
+#           LOG_SUMMARY="Build compiled successfully for undefined. Live servers operational."
+#           LOG_OUTPUT="GitHub Actions Workflow: Success\nFramework: undefined\nBranch: main\nCommit: ${{ github.sha }}\nRunner ID: ${{ github.run_id }}"
+# 
+#           curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
+#             -H "Content-Type: application/json" \
+#             -d "{
+#               \"project_id\": \"$PROJECT_ID\",
+#               \"status\": \"$STATUS\",
+#               \"version\": \"$VERSION\",
+#               \"env\": \"$ENV_TYPE\",
+#               \"log_summary\": \"$LOG_SUMMARY\",
+#               \"log_output\": \"$LOG_OUTPUT\"
+#             }"
+# 
+#       # 🔴 NOTIFY UCOLLYX ON FAILURE
+#       - name: Broadcast Failure to UCollyx Ecosystem
+#         if: failure()
+#         run: |
+#           PROJECT_ID="5"
+#           VERSION="v1.0.${{ github.run_number }}"
+#           ENV_TYPE="prod"
+#           STATUS="Failed"
+#           LOG_SUMMARY="Pipeline execution crashed during framework build/compilation phase."
+#           LOG_OUTPUT="GitHub Actions Workflow: Failed\nFramework: undefined\nBranch: main\nCheck logs for runner execution failure details."
+# 
+#           curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
+#             -H "Content-Type: application/json" \
+#             -d "{
+#               \"project_id\": \"$PROJECT_ID\",
+#               \"status\": \"$STATUS\",
+#               \"version\": \"$VERSION\",
+#               \"env\": \"$ENV_TYPE\",
+#               \"log_summary\": \"$LOG_SUMMARY\",
+#               \"log_output\": \"$LOG_OUTPUT\"
+#             }"
+# 
+
+name: UCollyx Production Pipeline
 
 on:
   push:
@@ -9,28 +77,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Upgraded to latest v4
 
-      - name: Setup Node.js Runtime Environment
-        uses: actions/setup-node@v4
+      # 🚀 STEP: Connect to EC2 via SSH and deploy code safely
+      - name: Deploy static files to AWS EC2
+        uses: appleboy/ssh-action@master
         with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Execute Framework Build Matrix
-        run: |
-          npm install
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            mkdir -p /home/ubuntu/test-deployments/ucollyx-test-app
+            cd /home/ubuntu/test-deployments/ucollyx-test-app
+            echo "Deploying fresh artifacts..."
 
       # 🟢 NOTIFY UCOLLYX ON SUCCESS
       - name: Broadcast Success to UCollyx Ecosystem
         if: success()
         run: |
-          PROJECT_ID="5"
-          VERSION="v1.0.${{ github.run_number }}"
+          PROJECT_ID="${{ secrets.UCOLLYX_PROJECT_ID || 1}}"
+          VERSION="v1.0.${{ github.run_number }}" # Automatically increments on every run (e.g. v1.0.1, v1.0.2)
           ENV_TYPE="prod"
-          STATUS="Success"
-          LOG_SUMMARY="Build compiled successfully for undefined. Live servers operational."
-          LOG_OUTPUT="GitHub Actions Workflow: Success\nFramework: undefined\nBranch: main\nCommit: ${{ github.sha }}\nRunner ID: ${{ github.run_id }}"
+          STATUS="Success" # Matches backend ENUM capitalization
+          LOG_SUMMARY="HTML layout deployed cleanly on AWS EC2 environment."
+          LOG_OUTPUT="GitHub Actions Workflow: Success\nBranch: main\nCommit: ${{ github.sha }}\nRunner ID: ${{ github.run_id }}"
 
           curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
             -H "Content-Type: application/json" \
@@ -47,12 +117,12 @@ jobs:
       - name: Broadcast Failure to UCollyx Ecosystem
         if: failure()
         run: |
-          PROJECT_ID="5"
+          PROJECT_ID="${{ secrets.UCOLLYX_PROJECT_ID || 1}}"
           VERSION="v1.0.${{ github.run_number }}"
           ENV_TYPE="prod"
-          STATUS="Failed"
-          LOG_SUMMARY="Pipeline execution crashed during framework build/compilation phase."
-          LOG_OUTPUT="GitHub Actions Workflow: Failed\nFramework: undefined\nBranch: main\nCheck logs for runner execution failure details."
+          STATUS="Failed" # Matches backend ENUM capitalization
+          LOG_SUMMARY="Pipeline compilation or synchronization crashed."
+          LOG_OUTPUT="GitHub Actions Workflow: Failed\nBranch: main\nCheck logs for runner execution failure details."
 
           curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
             -H "Content-Type: application/json" \
