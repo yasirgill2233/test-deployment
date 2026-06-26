@@ -1,0 +1,40 @@
+name: UCollyx Production Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v3
+
+      # 🚀 STEP: Connect to EC2 via SSH and deploy code safely
+      - name: Deploy static files to AWS EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            mkdir -p /home/ubuntu/test-deployments/ucollyx-test-app
+            cd /home/ubuntu/test-deployments/ucollyx-test-app
+            echo "Deploying fresh artifacts..."
+
+      # 🟢 NOTIFY UCOLLYX ON SUCCESS
+      - name: Broadcast Success to UCollyx Ecosystem
+        if: success()
+        run: |
+          curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
+          -H "Content-Type: application/json" \
+          -d '{"project_id": "${{ secrets.UCOLLYX_PROJECT_ID }}", "status": "success", "log_summary": "HTML layout deployed cleanly on AWS EC2 environment."}'
+
+      # 🔴 NOTIFY UCOLLYX ON FAILURE
+      - name: Broadcast Failure to UCollyx Ecosystem
+        if: failure()
+        run: |
+          curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
+          -H "Content-Type: application/json" \
+          -d '{"project_id": "${{ secrets.UCOLLYX_PROJECT_ID }}", "status": "failed", "log_summary": "Pipeline compilation or synchronization crashed."}'
