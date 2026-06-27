@@ -94,7 +94,7 @@ jobs:
       - name: Broadcast Success to UCollyx Ecosystem
         if: success()
         run: |
-          PROJECT_ID="${{ secrets.UCOLLYX_PROJECT_ID || 1}}"
+          PROJECT_ID="1"
           VERSION="v1.0.${{ github.run_number }}" # Automatically increments on every run (e.g. v1.0.1, v1.0.2)
           ENV_TYPE="prod"
           STATUS="Success" # Matches backend ENUM capitalization
@@ -114,7 +114,7 @@ jobs:
       - name: Broadcast Failure to UCollyx Ecosystem
         if: failure()
         run: |
-          PROJECT_ID="${{ secrets.UCOLLYX_PROJECT_ID || 1}}"
+          PROJECT_ID="1"
           VERSION="v1.0.${{ github.run_number }}"
           ENV_TYPE="prod"
           STATUS="Failed" # Matches backend ENUM capitalization
