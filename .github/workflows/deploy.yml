@@ -94,13 +94,13 @@ jobs:
       - name: Broadcast Success to UCollyx Ecosystem
         if: success()
         run: |
-          PROJECT_ID="5"
+          PROJECT_ID="${{ secrets.UCOLLYX_PROJECT_ID || 1}}"
           VERSION="v1.0.${{ github.run_number }}" # Automatically increments on every run (e.g. v1.0.1, v1.0.2)
           ENV_TYPE="prod"
           STATUS="Success" # Matches backend ENUM capitalization
           LOG_SUMMARY="HTML layout deployed cleanly on AWS EC2 environment."
           LOG_OUTPUT="GitHub Actions Workflow: Success\nBranch: main\nCommit: ${{ github.sha }}\nRunner ID: ${{ github.run_id }}"
-          curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
+          curl -X POST https://ucollyx.com/api/webhooks/pipeline-status \
             -H "Content-Type: application/json" \
             -d "{
               \"project_id\": \"$PROJECT_ID\",
@@ -114,13 +114,13 @@ jobs:
       - name: Broadcast Failure to UCollyx Ecosystem
         if: failure()
         run: |
-          PROJECT_ID="5"
+          PROJECT_ID="${{ secrets.UCOLLYX_PROJECT_ID || 1}}"
           VERSION="v1.0.${{ github.run_number }}"
           ENV_TYPE="prod"
           STATUS="Failed" # Matches backend ENUM capitalization
           LOG_SUMMARY="Pipeline compilation or synchronization crashed."
           LOG_OUTPUT="GitHub Actions Workflow: Failed\nBranch: main\nCheck logs for runner execution failure details."
-          curl -X POST http://51.21.194.171/api/webhooks/pipeline-status \
+          curl -X POST https://ucollyx.com/api/webhooks/pipeline-status \
             -H "Content-Type: application/json" \
             -d "{
               \"project_id\": \"$PROJECT_ID\",
