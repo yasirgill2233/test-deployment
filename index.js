@@ -6,6 +6,5 @@ function myFunction(){
 
 myFunction()  
  
-
-
+console.log("Hello how are you.")
 
