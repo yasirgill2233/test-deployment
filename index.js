@@ -4,7 +4,7 @@ function myFunction(){
     console.log("My Function is called, updated again")
 }
 
-myFunction() 
+myFunction()  
  
 
 
